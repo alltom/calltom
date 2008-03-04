@@ -12,8 +12,6 @@ struct Dict {
 };
 
 static char *parse_pair(char *qs, Dict *d);
-static char *eat_key(char *str);
-static char *eat_value(char *str);
 static char *copy_str(char *start, char *end);
 static void add_pair(Dict *d, char *key, char *value);
 static void make_upper(char *str);
@@ -58,27 +56,23 @@ get_value(Dict *dictionary, char *key) {
 /* returns character just after last character of value */
 static char *
 parse_pair(char *qs, Dict *d) {
-	char *key, *next, *var_start;
-	key = next = var_start = NULL;
+	char *key, *next, *equals;
+	key = next = equals = NULL;
 
 	if(qs == NULL || *qs == '\0') return NULL;
-	if(*qs == '&') return qs;
-	if(*qs == '=') return eat_value(qs + 1);
 
-	next = eat_key(qs);
-	key = copy_str(qs, next);
-	make_upper(key);
+	next = strchr(qs, '&');
+	if(next == NULL) next = qs + strlen(qs);
 
-	var_start = next + 1; /* skip the = */
-	if(*next == '\0' || *next == '&' || /* no variable */
-	   *var_start == '\0' || *var_start == '&' /* empty variable */
-	   ) {
-		add_pair(d, key, "");
+	equals = strchr(qs, '=');
+	if(equals == NULL || equals > next) {
+		if(next != qs)
+			add_pair(d, copy_str(qs, next), "");
 		return next;
 	}
 
-	next = eat_value(var_start);
-	add_pair(d, key, copy_str(var_start, next));
+	add_pair(d, copy_str(qs, equals), copy_str(equals + 1, next));
+
 	return next;
 }
 
@@ -91,22 +85,8 @@ add_pair(Dict *d, char *key, char *value) {
 	p->value = value;
 	p->next = d->head;
 	d->head = p;
-}
 
-static char *
-eat_key(char *str) {
-	char *end = str;
-	while(*end != '=' && *end != '&' && *end != '\0')
-		end++;
-	return end;
-}
-
-static char *
-eat_value(char *str) {
-	char *end = str;
-	while(*end != '&' && *end != '\0')
-		end++;
-	return end;
+	make_upper(p->key);
 }
 
 static char *
