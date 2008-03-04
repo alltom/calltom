@@ -74,5 +74,5 @@ process_root(Dict *get, char *method) {
 	}
 
 	printf("<hr />\n");
-	printf("<p>Why the heck is this here instead of my normal site? SHUT UP!</p>\n");
+	printf("<p>My site does NOT normally suck. Right now I'm experimenting with coding it as a single CGI in C, so this level of suckage should be temporary. All of the old content will return.</p>\n");
 }
