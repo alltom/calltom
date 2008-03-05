@@ -17,6 +17,8 @@ static void add_pair(Dict *d, char *key, char *value);
 static void make_upper(char *str);
 static char *strcp(char *str);
 
+static char *blank = "";
+
 /* builds a dictionary from a query string */
 Dict *
 get_query_dict(char *qs) {
@@ -36,6 +38,20 @@ get_query_dict(char *qs) {
 	return d;
 }
 
+void
+free_dict(Dict *d) {
+	Pair *p = d->head, *pb;
+	while(p != NULL) {
+		pb = p;
+		p = p->next;
+		free(pb->key);
+		if(pb->value != blank)
+			free(pb->value);
+		free(pb);
+	}
+	free(d);
+}
+
 char *
 get_value(Dict *dictionary, char *key) {
 	Pair *p = dictionary->head;
@@ -45,9 +61,12 @@ get_value(Dict *dictionary, char *key) {
 	make_upper(mykey);
 
 	for(; p != NULL; p = p->next) {
-		if(strcmp(p->key, mykey) == 0)
+		if(strcmp(p->key, mykey) == 0) {
+			free(mykey);
 			return p->value;
+		}
 	}
+	free(mykey);
 	return NULL;
 }
 
@@ -67,7 +86,7 @@ parse_pair(char *qs, Dict *d) {
 	equals = strchr(qs, '=');
 	if(equals == NULL || equals > next) {
 		if(next != qs)
-			add_pair(d, copy_str(qs, next), "");
+			add_pair(d, copy_str(qs, next), blank);
 		return next;
 	}
 
@@ -112,7 +131,7 @@ make_upper(char *str) {
 
 static char *
 strcp(char *str) {
-	char *new = (char *) malloc(strlen(str));
+	char *new = (char *) malloc(strlen(str) + 1);
 	char *front = new;
 	if(new == NULL) return NULL;
 	while((*new++ = *str++) != '\0');

@@ -3,25 +3,52 @@
 #include <string.h>
 #include "alltom.h"
 
-static void process_root(Dict *params, char *method);
+static void process_root(Dict *params, char *method, char **path);
+static char **parse_uri(char *uri);
 
 int
 main(void) {
 	Dict *get;
+	char **path;
 
 	printf("%s: %s\r\n", "Content-type", "text/html;charset=utf-8");
 	printf("\r\n");
 
 	get = get_query_dict(getenv("QUERY_STRING"));
-	process_root(get, getenv("REQUEST_METHOD"));
+	path = parse_uri(getenv("PATH_INFO"));
+
+	process_root(get, getenv("REQUEST_METHOD"), path);
+
+	free_dict(get);
+	free(path);
+
 	return 0;
 }
 
+static char **
+parse_uri(char *uri) {
+	/* count slashes */
+	int num_slashes = 1, i;
+	char **ary, *pos = uri; /* always starts with '/' */
+	while((pos = strchr(pos + 1, '/')) != NULL)
+		num_slashes++;
+
+	/* stuff into array */
+	ary = (char **) malloc(num_slashes * sizeof(char *));
+	if(ary == NULL) return NULL;
+	pos = strtok(uri + 1, "/");
+	for(i = 0; pos != NULL; pos = strtok(NULL, "/"), i++)
+		ary[i] = pos;
+	ary[i] = '\0';
+
+	return ary;
+}
+
 static void
-process_root(Dict *get, char *method) {
+process_root(Dict *get, char *method, char **path) {
 	char *cm, *cn, *unencoded;
 	char post[255];
-	int m, n, len;
+	int i, m, n, len;
 
 	printf("<title>Multiplication results</title>\n");
 	printf("<h1>Multiplication results</h1>\n");
@@ -38,6 +65,8 @@ process_root(Dict *get, char *method) {
 	printf("<hr />\n");
 
 	printf("<p>URI: %s</p>\n", getenv("PATH_INFO"));
+	for(i = 0; path[i] != NULL; i++)
+		printf("<p>[%s]</p>\n", path[i]);
 
 	printf("<hr />\n");
 
@@ -76,3 +105,5 @@ process_root(Dict *get, char *method) {
 	printf("<hr />\n");
 	printf("<p>My site does NOT normally suck. Right now I'm experimenting with coding it as a single CGI in C, so this level of suckage should be temporary. All of the old content will return.</p>\n");
 }
+
+/* vim:set ts=4 sts=4 sw=4 noet: */
