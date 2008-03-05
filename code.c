@@ -7,7 +7,7 @@ char *
 unencode(char *str) {
 	char *deststart, *dest;
 	int len = 0, maxlen = strlen(str);
-	deststart = dest = (char *) malloc(maxlen);
+	deststart = dest = (char *) malloc(maxlen*2);
 	if(dest == NULL) return NULL;
 	for(; str != '\0' && len < maxlen; str++, dest++, len++) {
 		if(*str == '+') {
