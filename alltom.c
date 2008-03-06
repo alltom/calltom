@@ -133,6 +133,7 @@ process_page(Dict *get, char *method, char **path, char *page) {
 
 	printf("<hr />\n");
 	printf("<p>My site does NOT normally suck. Right now I'm experimenting with coding it as a single CGI in C, so this level of suckage should be temporary. All of the old content will return.</p>\n");
+	printf("<p><a href=\"http://github.com/AllTom/calltom/tree/master\">You can help</a> if you're not a lazy bum.</p>\n");
 }
 
 /* vim:set ts=4 sts=4 sw=4 noet: */
